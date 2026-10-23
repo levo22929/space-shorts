@@ -38,6 +38,12 @@ projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
   [[metin, renk|null], ...], y, emoji)`. İfadeler (`TEXPR`): happy, smug, laugh, angry, shocked, scared, sad, crying, worried —
   kaş yok, ifade göz kapağıyla. `proto/toon.html` rakiple yan yana karşılaştırma sahneleri.
 
+- `shorts/gift-box/` — "Choose one box 🎁" (2026-10-23): 8 harfli kutu, sırayla açılır, 15 sn döngü. Hediyeler şimdilik
+  Twemoji (CC BY 4.0, `gifts/TWEMOJI-LICENSE.txt`); kullanıcı Flow'da üretip gönderince `scene.html` içindeki `GIFTS[i].img`
+  değiştirilir. Kontroller: ilk–son kare 0,11, siyah kare 0, −13,7 LUFS / tepe −1,3 dBFS, ses = görüntü = 15 sn.
+  Ses: `cue.json` (`"mood": "happy"`, pop + sparkle + tick + rewind). Bu klipte +2,7 dB fazla geldi; `volume=0.6dB` kullanıldı.
+- `tools/serve.js` .svg ve .webp türlerini de sunar (yoksa tarayıcı SVG'yi açmıyor).
+
 ## Açık işler
 - Kızgın/donmuş ifadede dişler görünmüyor (ağız eğrisinin gerçek yüksekliği kontrol noktasının yarısı).
 - Kontrolleri tek betikte topla (ilk–son kare, siyah kare, LUFS, süre, kare sayfası).

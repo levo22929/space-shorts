@@ -18,11 +18,11 @@ def env(n, a, r):
     return e
 
 
-def pad(dur):
+def pad(dur, mood="dark"):
     t = np.arange(int(dur * SR)) / SR
     out = np.zeros_like(t)
-    # Am – F akoru, döngü süresine oturan yavaş geçiş
-    chords = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63]]
+    # dark: Am – F; happy: C – G (döngü süresine oturan yavaş geçiş)
+    chords = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63]] if mood == "dark" else [[261.63, 329.63, 392.0], [196.0, 246.94, 293.66]]
     mix = 0.5 - 0.5 * np.cos(2 * np.pi * t / dur * 2)  # süre içinde 2 tam salınım
     for i, ch in enumerate(chords):
         w = mix if i else 1 - mix
@@ -60,6 +60,20 @@ def rewind(dur):
     return s * np.sin(np.pi * t / dur) ** 2
 
 
+def pop():
+    n = int(0.25 * SR); t = np.arange(n) / SR
+    f = 500 + 900 * np.exp(-t * 30)
+    return 0.7 * np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 18)
+
+
+def sparkle():
+    n = int(0.6 * SR); t = np.arange(n) / SR; out = np.zeros(n)
+    for k, f in enumerate((2093, 2637, 3136, 4186)):
+        i = int(k * 0.06 * SR); tt = t[: n - i]
+        out[i:] += 0.18 * np.sin(2 * np.pi * f * tt) * np.exp(-tt * 9)
+    return out
+
+
 def place(buf, x, at):
     i = int(at * SR); j = min(len(buf), i + len(x))
     buf[i:j] += x[:j - i]
@@ -68,7 +82,7 @@ def place(buf, x, at):
 def main(cue_path, out):
     cue = json.load(open(cue_path))
     dur = cue["duration"]
-    music = pad(dur)
+    music = pad(dur, cue.get("mood", "dark"))
     sfx = np.zeros_like(music)
     duck = np.ones_like(music)
     for e in cue["events"]:
@@ -78,6 +92,8 @@ def main(cue_path, out):
             i = int(e["t"] * SR); duck[i:i + int(1.5 * SR)] = np.linspace(0.3, 1, int(1.5 * SR))[:len(duck) - i]
         elif e["type"] == "ticks":
             for k in np.arange(e["t"], e["until"], e["every"]): place(sfx, tick(), k)
+        elif e["type"] == "pop": place(sfx, pop(), e["t"])
+        elif e["type"] == "sparkle": place(sfx, sparkle(), e["t"])
         elif e["type"] == "rewind": place(sfx, rewind(e["until"] - e["t"]), e["t"])
     mixd = music * duck + sfx
     mixd = mixd / max(1e-9, np.abs(mixd).max()) * 0.9

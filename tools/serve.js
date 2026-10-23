@@ -2,7 +2,7 @@
 const path = require('path'), fs = require('fs'), http = require('http');
 const { chromium } = require(process.env.PW || '/opt/node-tools/node_modules/playwright');
 const ROOT = path.resolve(__dirname, '..');
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.png': 'image/png', '.ttf': 'font/ttf' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.png': 'image/png', '.ttf': 'font/ttf', '.svg': 'image/svg+xml', '.webp': 'image/webp' };
 
 async function openPage(pageFile) {
   const srv = http.createServer((req, res) => {

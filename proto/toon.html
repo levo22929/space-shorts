@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Bangers; src: url(../engine/fonts/Bangers-Regular.ttf); }
+html, body { margin: 0; background: #000; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="../engine/engine.js"></script>
+<script src="../engine/toon.js"></script>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+window.ready = Promise.resolve();
+// Rakiple yan yana karşılaştırma için 4 sahne (2×2 değil, her mod bir tam kare)
+window.renderAt = (t, mode = 'a') => {
+  ctx.clearRect(0, 0, W, H); drawSpace(ctx, t);
+  if (mode === 'a') {
+    speaker(ctx, 'SATURN', '#ff4fd8', [['I want ', null], ['Rings', '#ffd60a'], [' like those', null]], 150, '\u{1F60C}');
+    toonPlanet(ctx, 'uranus', 290, 920, 150, t, TEXPR.angry);
+    toonPlanet(ctx, 'jupiter', 760, 900, 190, t, TEXPR.sad);
+  } else if (mode === 'b') {
+    speaker(ctx, 'JUPITER', '#ffb703', [['But ', null], ['1,321 Earths', '#ff3d6e'], [' could fit', null], ['\n', null], ['inside me', null]], 150, '\u{1F60E}');
+    toonEarth(ctx, 260, 980, 110, t, TEXPR.worried);
+    toonPlanet(ctx, 'jupiter', 700, 900, 260, t, TEXPR.smug);
+  } else if (mode === 'c') {
+    speaker(ctx, 'SUN', '#ffb703', [['Who do ', null], ['You Mean', '#ffd60a'], ['?', null]], 150, '\u{1F630}');
+    toonSun(ctx, 540, 1000, 260, t, TEXPR.shocked);
+  } else {
+    speaker(ctx, 'URANUS', '#3ad1ff', [['No ', null], ['Get Lost', '#ff3d6e'], [' you idiot', null]], 150, '\u{1F621}');
+    toonPlanet(ctx, 'saturn', 540, 980, 230, t, TEXPR.crying);
+    toonPlanet(ctx, 'moon', 230, 620, 70, t, TEXPR.laugh);
+    toonPlanet(ctx, 'mars', 860, 620, 70, t, TEXPR.scared);
+  }
+};
+</script></body></html>

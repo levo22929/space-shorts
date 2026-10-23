@@ -1,6 +1,7 @@
 # Space Shorts — çalışma hafızası
 
-Yeni bir YouTube Shorts kanalı: yüzlü gezegen karakterleriyle kısa uzay/fizik animasyonları. Kanal adı henüz seçilmedi.
+Yeni bir YouTube Shorts kanalı: yüzlü gezegen karakterleriyle kısa uzay/fizik animasyonları. Tarz (2026-10-23): rakibin
+çizgi film diyalog formatı (`engine/toon.js`), bkz. `notlar/rakip-analizi.md`. Kanal adı henüz seçilmedi.
 Kullanıcıyla Türkçe konuş; videolar İngilizce. Bu depo Hidden Map sahibine ait; `kkarakule12/latitude-lab` arkadaşının
 projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
 
@@ -32,6 +33,10 @@ projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
 ## Videolar
 - `shorts/sun-vanished/` — deneme 1 (2026-10-23): 14,5 sn. Kontroller: ilk–son kare farkı 0,44 (< 1), siyah kare 0,
   −14,2 LUFS / tepe −1,1 dBFS, ses = görüntü = 14,5 sn. "Işık ve kütle çekimi aynı hızda" iddiası için iki kaynak henüz yazılmadı.
+
+- `engine/toon.js` — çizgi film tarzı: `toonPlanet(ctx, ad, x, y, r, t, TEXPR.x)`, `toonEarth`, `toonSun`, `speaker(ctx, ad, renk,
+  [[metin, renk|null], ...], y, emoji)`. İfadeler (`TEXPR`): happy, smug, laugh, angry, shocked, scared, sad, crying, worried —
+  kaş yok, ifade göz kapağıyla. `proto/toon.html` rakiple yan yana karşılaştırma sahneleri.
 
 ## Açık işler
 - Kızgın/donmuş ifadede dişler görünmüyor (ağız eğrisinin gerçek yüksekliği kontrol noktasının yarısı).

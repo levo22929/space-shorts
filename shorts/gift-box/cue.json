@@ -1,8 +1,6 @@
 {
  "duration": 14.5,
- "mood": "hype",
- "bpm": 120,
- "drop": 13.3,
+ "mood": "none",
  "events": [
   {
    "t": 13.3,

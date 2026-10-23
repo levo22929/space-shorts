@@ -117,7 +117,8 @@ def main(cue_path, out):
     cue = json.load(open(cue_path))
     dur = cue["duration"]
     mood = cue.get("mood", "dark")
-    music = hype(dur, cue.get("bpm", 120), cue.get("drop")) if mood == "hype" else pad(dur, mood)
+    if mood == "none": music = np.zeros(int(dur * SR))   # müzik yükleme sırasında YouTube ses kitaplığından eklenir
+    else: music = hype(dur, cue.get("bpm", 120), cue.get("drop")) if mood == "hype" else pad(dur, mood)
     sfx = np.zeros_like(music)
     duck = np.ones_like(music)
     for e in cue["events"]:

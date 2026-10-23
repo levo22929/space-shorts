@@ -14,11 +14,11 @@ canvas { display: block; }
 // Hediye görselleri: gifts/ altında. Flow görselleri gelince GIFTS[i].img dosya adını değiştirmek yeterli.
 const ctx = document.getElementById('c').getContext('2d');
 const BOX_IMG = 'box_blue.jpg', ACCENT = '#1f3fa8';   // kutu rengine uyan yazı rengi
-const GIFTS = [
-  { letter: 'A', img: 'gifts/tw_1f4f1.svg' }, { letter: 'S', img: 'gifts/tw_1f697.svg' },
-  { letter: 'M', img: 'gifts/tw_1f451.svg' }, { letter: 'K', img: 'gifts/tw_1f431.svg' },
-  { letter: 'R', img: 'gifts/tw_1f48d.svg' }, { letter: 'N', img: 'gifts/tw_1f382.svg' },
-  { letter: 'J', img: 'gifts/tw_1f3f0.svg' }, { letter: 'T', img: 'gifts/tw_1f490.svg' },
+const GIFTS = [   // Flow ürün fotoğrafları (beyaz/açık gri zemin); harf = dosya adı
+  { letter: 'A', img: 'gifts/A.jpg' }, { letter: 'S', img: 'gifts/S.jpg' },
+  { letter: 'M', img: 'gifts/M.jpg' }, { letter: 'K', img: 'gifts/K.jpg' },
+  { letter: 'R', img: 'gifts/R.jpg' }, { letter: 'N', img: 'gifts/N.jpg' },
+  { letter: 'J', img: 'gifts/J.jpg' }, { letter: 'T', img: 'gifts/T.jpg' },
 ];
 const load = src => new Promise((ok, fail) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => fail(new Error(src)); im.src = src; });
 let BOX;
@@ -62,10 +62,11 @@ window.renderAt = (t) => {
     GIFTS.forEach((g, i) => {
       const [x, y] = pos(i), cw = 470, ch = 270;
       ctx.save(); ctx.translate(x, y);
-      ctx.fillStyle = '#f6f7fb'; ctx.strokeStyle = '#e1e4ef'; ctx.lineWidth = 3;
+      // kart zemini fotoğrafların açık gri zeminiyle aynı; fotoğraf 'multiply' ile çizilir, kenar dikişi görünmez
+      ctx.fillStyle = '#f4f4f6'; ctx.strokeStyle = '#e3e5ec'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 22); ctx.fill(); ctx.stroke();
-      glow(ctx, 0, 0, 10, 150, 'rgba(255,210,110,1)', 0.5 * k);
-      const s = 230 * (0.85 + 0.15 * k); ctx.drawImage(g.im, -s / 2, -s / 2, s, s);
+      ctx.save(); ctx.clip(); ctx.globalCompositeOperation = 'multiply';
+      const s = 300 * (0.92 + 0.08 * k); ctx.drawImage(g.im, -s / 2, -s / 2 + 8, s, s); ctx.restore();
       ctx.font = 'bold 56px "DejaVu Serif", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.lineWidth = 8; ctx.strokeStyle = '#ffffff'; ctx.strokeText(g.letter, -cw / 2 + 48, -ch / 2 + 46);
       ctx.fillStyle = ACCENT; ctx.fillText(g.letter, -cw / 2 + 48, -ch / 2 + 46);

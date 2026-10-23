@@ -16,7 +16,12 @@ projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
 - `engine/engine.js` — çizim çekirdeği: `drawSpace`, `glow`, `title`, `label`, `drawFace` + `EXPR` (happy, surprised,
   scared, frozen, angry, cool; `lerpExpr` ile geçiş), `drawSun`, `drawEarth` (frost 0–1).
 - `proto/characters.html` — karakter kontrol sayfası (`renderAt(t, 'sheet' | 'scene')`).
-- `tools/shot.js` — tek kare PNG: `node tools/shot.js <sayfa> <çıktı.png> [t] [mod]`.
+- `engine/real.js` — gerçekçi çizim (2026-10-23, kullanıcı "yapay duruyor" dedi): doku küreye piksel piksel giydirilir;
+  ışık-gölge sınırı, Dünya'da gece ışıkları + bulut, atmosfer parıltısı, Satürn halkası. `drawPlanet(ctx, ad, x, y, r, t)`,
+  `drawRealSun`. Dokular `engine/tex/` (Solar System Scope, CC BY 4.0; açıklamaya kaynak satırı yazılır, bkz. `SOURCE.md`).
+- `proto/realistic.html` — `lineup` (bütün gezegenler), `scene` (Güneş + Dünya), `face` (aynı sahne, yüzlü).
+- `tools/shot.js` — tek kare PNG: `node tools/shot.js <sayfa> <çıktı.png> [t] [mod]`. Sayfayı yerel http sunucusundan açar
+  (file:// ile doku pikselleri okunamıyor: "canvas has been tainted").
 
 ## Açık işler
 - Kızgın/donmuş ifadede dişler görünmüyor (ağız eğrisinin gerçek yüksekliği kontrol noktasının yarısı).

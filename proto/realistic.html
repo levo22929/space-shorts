@@ -1,0 +1,44 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Bangers; src: url(../engine/fonts/Bangers-Regular.ttf); }
+html, body { margin: 0; background: #000; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="../engine/engine.js"></script>
+<script src="../engine/real.js"></script>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+window.ready = loadTextures('../engine/tex/', ['2k_sun', '2k_mercury', '2k_venus_atmosphere', '2k_earth_daymap', '2k_earth_nightmap',
+  '2k_earth_clouds', '2k_moon', '2k_mars', '2k_jupiter', '2k_saturn', '2k_saturn_ring_alpha', '2k_uranus', '2k_neptune']);
+
+// 'lineup': Güneş + bütün gezegenler (yüzsüz). 'scene': Güneş ve Dünya; 'face': aynı sahne, yüzlü.
+window.renderAt = (t, mode = 'lineup') => {
+  ctx.clearRect(0, 0, W, H);
+  drawSpace(ctx, t);
+  if (mode === 'lineup') {
+    title(ctx, [{ text: 'THE REAL', color: '#ffffff' }, { text: 'SOLAR SYSTEM', color: '#ffd60a' }], 110, 96);
+    drawRealSun(ctx, W / 2, 420, 170, t);
+    const row = [['mercury', 55], ['venus', 80], ['earth', 85], ['mars', 65]];
+    row.forEach(([n, r], i) => { drawPlanet(ctx, n, 150 + i * 260, 830, r, t); label(ctx, n.toUpperCase(), 150 + i * 260, 955, 40); });
+    drawPlanet(ctx, 'jupiter', 290, 1230, 175, t);
+    label(ctx, 'JUPITER', 290, 1450, 44);
+    drawPlanet(ctx, 'saturn', 800, 1230, 120, t, { incl: 0.4, tilt: -0.15 });
+    label(ctx, 'SATURN', 800, 1450, 44);
+    drawPlanet(ctx, 'uranus', 330, 1660, 110, t);
+    label(ctx, 'URANUS', 330, 1810, 44);
+    drawPlanet(ctx, 'neptune', 760, 1660, 110, t);
+    label(ctx, 'NEPTUNE', 760, 1810, 44);
+  } else {
+    title(ctx, [{ text: 'NO SUN FOR', color: '#ffffff' }, { text: '8 MINUTES?', color: '#ffd60a' }], 230, 110);
+    drawRealSun(ctx, W / 2, 700, 200, t);
+    drawPlanet(ctx, 'earth', W / 2, 1300, 230, t, { light: [0, -0.9, 0.45] });
+    if (mode === 'face') {
+      drawFace(ctx, W / 2, 710, 200, EXPR.happy, t, '#ffb627', '#5a1e00');
+      drawFace(ctx, W / 2, 1310, 230, EXPR.scared, t, '#2a6db0', '#06152e');
+    }
+    label(ctx, '8 MIN 19 S', W / 2, 1640, 96, '#7fdbff');
+  }
+};
+</script></body></html>

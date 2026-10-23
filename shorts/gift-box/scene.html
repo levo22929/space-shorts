@@ -2,128 +2,75 @@
 <html><head><meta charset="utf-8">
 <style>
 @font-face { font-family: Bangers; src: url(../../engine/fonts/Bangers-Regular.ttf); }
-html, body { margin: 0; background: #000; }
+html, body { margin: 0; background: #fff; }
 canvas { display: block; }
 </style></head>
 <body><canvas id="c" width="1080" height="1920"></canvas>
 <script src="../../engine/engine.js"></script>
 <script>
-// "Choose one box 🎁" — harfli 8 hediye kutusu, sırayla açılır, hediyeler görünür, kapaklar geri kapanır (döngü).
+// "Choose one box 🎁" — rakibin (im2ylitee) ölçülen zamanlaması: ~13,3 sn hareketsize yakın kutular, sonra sert kesmeyle
+// ~1,2 sn hediye ızgarası, sonra sert kesmeyle başa döner. Kısa görünme izleyiciyi tekrar izlemeye/durdurmaya iter.
+// Kutu: Flow ürün fotoğrafı (beyaz zemin), 'multiply' ile çizilir; beyaz zemin kaybolur, üst üste binmeler doğal kalır.
 // Hediye görselleri: gifts/ altında. Flow görselleri gelince GIFTS[i].img dosya adını değiştirmek yeterli.
 const ctx = document.getElementById('c').getContext('2d');
+const BOX_IMG = 'box_blue.jpg', ACCENT = '#1f3fa8';   // kutu rengine uyan yazı rengi
 const GIFTS = [
   { letter: 'A', img: 'gifts/tw_1f4f1.svg' }, { letter: 'S', img: 'gifts/tw_1f697.svg' },
   { letter: 'M', img: 'gifts/tw_1f451.svg' }, { letter: 'K', img: 'gifts/tw_1f431.svg' },
   { letter: 'R', img: 'gifts/tw_1f48d.svg' }, { letter: 'N', img: 'gifts/tw_1f382.svg' },
   { letter: 'J', img: 'gifts/tw_1f3f0.svg' }, { letter: 'T', img: 'gifts/tw_1f490.svg' },
 ];
-window.ready = Promise.all(GIFTS.map(g => new Promise((ok, fail) => {
-  const im = new Image(); im.onload = () => { g.im = im; ok(); }; im.onerror = () => fail(new Error(g.img)); im.src = g.img;
-})));
+const load = src => new Promise((ok, fail) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => fail(new Error(src)); im.src = src; });
+let BOX;
+window.ready = Promise.all([load(BOX_IMG).then(im => (BOX = im)), ...GIFTS.map(g => load(g.img).then(im => (g.im = im)))]);
 
-// Rakipte (im2ylitee) ölçülen: ~13 sn hareketsiz kutular, hediyeler yalnızca ~1 sn görünür, sonra sert kesmeyle başa döner.
-// Kısa görünme izleyiciyi tekrar izlemeye/durdurmaya iter. Kapanış animasyonu yok (CLOSE > END).
-const OPEN0 = 13.3, STEP = 0, OPEN_DUR = 0.15, CLOSE = 99, END = 14.5;
+const REVEAL = 13.3, END = 14.5;
 window.DURATION = END;
-const COLS = [300, 780], ROWS = [560, 845, 1130, 1415], BW = 330, BH = 210;
+const COLS = [280, 780], ROWS = [520, 800, 1080, 1360], S = 450;   // kutu görseli çizim boyutu (kare)
 const pos = i => [COLS[i % 2], ROWS[Math.floor(i / 2)]];
-const openAt = i => OPEN0 + i * STEP;
 
-function background(t) {
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#fff6fa'); g.addColorStop(0.5, '#ffe4ef'); g.addColorStop(1, '#ffd3e6');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  const R = rng(11);
-  for (let i = 0; i < 70; i++) { // yavaşça süzülen parıltılar (döngü süresine oturan hareket)
-    const x = R() * W, y0 = R() * H, s = 3 + R() * 6, ph = R() * 6.28;
-    const y = y0 + Math.sin(2 * Math.PI * t / END + ph) * 40, a = 0.35 + 0.35 * Math.sin(ph + t * 2 * Math.PI / END * 3);
-    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = i % 3 ? '#ffffff' : '#ffc94d';
-    ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-s / 2, -s / 2, s, s); ctx.restore();
-  }
-}
-
-function star(x, y, r, a) {
-  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = '#fff3b0'; ctx.translate(x, y); ctx.beginPath();
-  for (let i = 0; i < 8; i++) { const rr = i % 2 ? r * 0.3 : r, an = i * Math.PI / 4; ctx.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); }
-  ctx.closePath(); ctx.fill(); ctx.restore();
-}
-
-// Kutu gövdesi (ön yüz + üst kenar), kurdele, kapak ayrı çizilir (açılırken uçar)
-function boxBody(x, y) {
-  const w = BW, h = BH * 0.78, top = y - BH / 2 + BH * 0.22;
-  ctx.save();
-  ctx.fillStyle = 'rgba(120,30,60,0.18)'; ctx.beginPath(); ctx.ellipse(x, y + BH / 2 + 8, w * 0.48, 16, 0, 0, 6.2832); ctx.fill();
-  const g = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
-  g.addColorStop(0, '#7d2b45'); g.addColorStop(0.5, '#9c3a5a'); g.addColorStop(1, '#6a2238');
-  ctx.fillStyle = g; roundRect(x - w / 2, top, w, h, 14); ctx.fill();
-  ctx.fillStyle = '#e8b4c4'; ctx.fillRect(x - 16, top, 32, h);               // dikey kurdele
-  ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(x - w / 2 + 10, top + 8, 10, h - 20);
+function header(sub) {
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.font = '124px Bangers'; ctx.lineWidth = 16; ctx.strokeStyle = '#ffffff'; ctx.strokeText('CHOOSE ONE BOX', W / 2, 160);
+  ctx.fillStyle = ACCENT; ctx.fillText('CHOOSE ONE BOX', W / 2, 160);
+  ctx.font = '62px Bangers'; ctx.fillStyle = '#222'; ctx.fillText(sub, W / 2, 262);
   ctx.restore();
-}
-function lid(x, y, letter, k, t) { // k: 0 kapalı, 1 tamamen uçmuş
-  const w = BW * 1.06, h = BH * 0.3;
-  const ly = y - BH / 2 + h / 2 - k * 260, rot = k * 0.5 * (x < W / 2 ? -1 : 1), a = 1 - k;
-  if (a <= 0) return;
-  ctx.save(); ctx.globalAlpha = a; ctx.translate(x + k * (x < W / 2 ? -60 : 60), ly); ctx.rotate(rot);
-  const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2); g.addColorStop(0, '#b24a6d'); g.addColorStop(1, '#842f4c');
-  ctx.fillStyle = g; roundRect(-w / 2, -h / 2, w, h, 12); ctx.fill();
-  ctx.fillStyle = '#f2c4d2'; ctx.fillRect(-18, -h / 2, 36, h);
-  // fiyonk
-  ctx.fillStyle = '#f7d3df'; ctx.strokeStyle = '#c9869c'; ctx.lineWidth = 4;
-  for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 46, -h / 2 - 10, 52, 26, s * 0.35, 0, 6.2832); ctx.fill(); ctx.stroke(); }
-  ctx.beginPath(); ctx.arc(0, -h / 2 - 8, 18, 0, 6.2832); ctx.fill(); ctx.stroke();
-  // harf rozeti
-  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#6a2238'; ctx.lineWidth = 6;
-  ctx.beginPath(); ctx.arc(0, 4, 46, 0, 6.2832); ctx.fill(); ctx.stroke();
-  ctx.font = '78px Bangers'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#6a2238';
-  ctx.fillText(letter, 1, 8);
-  ctx.restore();
-}
-function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
-
-function gift(g, x, y, k, t, i) { // k: 0 görünmez, 1 tam
-  if (k <= 0) return;
-  const s = 0.2 + 0.8 * ease.back(clamp(k)), bob = Math.sin(t * 2 * Math.PI / END * 4 + i) * 6;
-  ctx.save(); ctx.translate(x, y - 40 + bob);
-  glow(ctx, 0, 0, 10, 170, 'rgba(255,215,120,1)', 0.65 * k);
-  ctx.scale(s, s);
-  const S = 210; ctx.drawImage(g.im, -S / 2, -S / 2, S, S);
-  ctx.restore();
-  // harf etiketi (hediyenin altında)
-  ctx.save(); ctx.globalAlpha = clamp(k * 2 - 1);
-  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#842f4c'; ctx.lineWidth = 5;
-  ctx.beginPath(); ctx.arc(x - 120, y - 120, 34, 0, 6.2832); ctx.fill(); ctx.stroke();
-  ctx.font = '58px Bangers'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#842f4c';
-  ctx.fillText(g.letter, x - 119, y - 117); ctx.restore();
 }
 
 window.renderAt = (t) => {
-  ctx.clearRect(0, 0, W, H); background(t);
-  // başlık
-  ctx.save(); ctx.font = '120px Bangers'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.lineJoin = 'round'; ctx.lineWidth = 18; ctx.strokeStyle = '#ffffff'; ctx.strokeText('CHOOSE ONE BOX', W / 2, 165);
-  ctx.fillStyle = '#c2185b'; ctx.fillText('CHOOSE ONE BOX', W / 2, 165);
-  const sub = t > OPEN0 + 8 * STEP + 0.3 && t < CLOSE ? 'WHAT DID YOU GET? COMMENT!' : 'PICK YOUR FIRST LETTER';
-  ctx.font = '64px Bangers'; ctx.lineWidth = 12; ctx.strokeText(sub, W / 2, 275); ctx.fillStyle = '#7d2b45'; ctx.fillText(sub, W / 2, 275);
-  ctx.restore();
-
-  GIFTS.forEach((g, i) => {
-    const [x, y] = pos(i);
-    const o = t < CLOSE ? prog(t, openAt(i), openAt(i) + OPEN_DUR, ease.out) : 1 - prog(t, CLOSE + i * 0.12, CLOSE + i * 0.12 + 0.4, ease.inOut);
-    // açılmadan önce: kutular sırayla zıplar (seçim heyecanı)
-    const env = prog(t, 0, 0.5) * (1 - prog(t, OPEN0 - 0.3, OPEN0)); // döngü başında/sonunda sıfır
-    const hop = env * Math.max(0, Math.sin((t * 2.2 - i * 0.28) * Math.PI)) ** 6 * 26;
-    const wig = env * Math.sin(t * 9 + i) * 0.02;
-    ctx.save(); ctx.translate(x, y - hop); ctx.rotate(wig); ctx.translate(-x, -y);
-    boxBody(x, y);
-    gift(g, x, y, o, t, i);
-    lid(x, y, g.letter, o, t);
-    ctx.restore();
-    // açılış parıltısı
-    const sp = t - openAt(i);
-    if (t < CLOSE && sp > 0 && sp < 0.6) for (let k = 0; k < 6; k++) {
-      const an = k * 1.047 + i, d = 60 + sp * 260; star(x + Math.cos(an) * d, y - 60 + Math.sin(an) * d * 0.7, 22, 1 - sp / 0.6);
-    }
-  });
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  if (t < REVEAL) {
+    header('PICK YOUR FIRST LETTER \u{1F447}');
+    GIFTS.forEach((g, i) => {
+      const [x, y] = pos(i);
+      // hafif nefes alma: döngü başında ve açılıştan hemen önce sıfır, böylece kesmeler temiz kalır
+      const env = prog(t, 0, 0.5) * (1 - prog(t, REVEAL - 0.4, REVEAL));
+      const sc = 1 + env * 0.015 * Math.sin(t * 2.4 + i * 0.8);
+      ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+      ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(BOX, -S / 2, -S / 2, S, S);
+      ctx.globalCompositeOperation = 'source-over';
+      // harf: ön yüzde iki kurdelenin arasına, beyaz serif + koyu kontur
+      ctx.font = 'bold 92px "DejaVu Serif", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round'; ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(10,20,60,0.9)';
+      ctx.strokeText(g.letter, -S * 0.03, S * 0.19); ctx.fillStyle = '#ffffff'; ctx.fillText(g.letter, -S * 0.03, S * 0.19);
+      ctx.restore();
+    });
+  } else {
+    header('WHAT DID YOU GET? \u{1F381}');
+    const k = prog(t, REVEAL, REVEAL + 0.12, ease.out);
+    GIFTS.forEach((g, i) => {
+      const [x, y] = pos(i), cw = 470, ch = 270;
+      ctx.save(); ctx.translate(x, y);
+      ctx.fillStyle = '#f6f7fb'; ctx.strokeStyle = '#e1e4ef'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 22); ctx.fill(); ctx.stroke();
+      glow(ctx, 0, 0, 10, 150, 'rgba(255,210,110,1)', 0.5 * k);
+      const s = 230 * (0.85 + 0.15 * k); ctx.drawImage(g.im, -s / 2, -s / 2, s, s);
+      ctx.font = 'bold 56px "DejaVu Serif", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 8; ctx.strokeStyle = '#ffffff'; ctx.strokeText(g.letter, -cw / 2 + 48, -ch / 2 + 46);
+      ctx.fillStyle = ACCENT; ctx.fillText(g.letter, -cw / 2 + 48, -ch / 2 + 46);
+      ctx.restore();
+    });
+  }
 };
 </script></body></html>

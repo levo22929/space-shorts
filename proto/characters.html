@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Bangers; src: url(../engine/fonts/Bangers-Regular.ttf); }
+html, body { margin: 0; background: #000; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="../engine/engine.js"></script>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+const NAMES = ['happy', 'surprised', 'scared', 'frozen', 'angry', 'cool'];
+
+// mode 'sheet': 12 hücre (Güneş ve Dünya × 6 ifade). mode 'scene': örnek bir Short karesi.
+window.renderAt = (t, mode = 'sheet') => {
+  ctx.clearRect(0, 0, W, H);
+  drawSpace(ctx, t);
+  if (mode === 'sheet') {
+    title(ctx, [{ text: 'MEET THE', color: '#ffffff' }, { text: 'CAST', color: '#ffd60a' }], 90, 96);
+    const cw = 360, ch = 440, top = 170;
+    NAMES.forEach((n, i) => {
+      const col = i % 3, row = Math.floor(i / 3);
+      const cx = cw * col + cw / 2;
+      drawSun(ctx, cx, top + row * ch + 190, 105, t, EXPR[n]);
+      label(ctx, n.toUpperCase(), cx, top + row * ch + 395, 44);
+      drawEarth(ctx, cx, top + (row + 2) * ch + 190, 120, t, EXPR[n], n === 'frozen' ? 1 : 0);
+      label(ctx, n.toUpperCase(), cx, top + (row + 2) * ch + 395, 44);
+    });
+  } else {
+    title(ctx, [{ text: 'NO SUN FOR', color: '#ffffff' }, { text: '8 MINUTES?', color: '#ffd60a' }], 230, 110);
+    drawSun(ctx, W / 2, 720, 210, t, EXPR.cool);
+    drawEarth(ctx, W / 2, 1300, 190, t, lerpExpr(EXPR.scared, EXPR.frozen, 0.5), 0.5);
+    label(ctx, '8 MIN 19 S', W / 2, 1600, 96, '#7fdbff');
+  }
+};
+</script></body></html>

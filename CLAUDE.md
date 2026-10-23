@@ -47,6 +47,10 @@ projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
   harf seti ve kutu rengini değiştiriyor; konuşma yok, enerjik müzik ("Bu sesi kullan" → YouTube ses kitaplığı).
   Müzik: `"mood": "hype"` (`tools/audio.py` `hype()`: 120 bpm kick/alkış/hi-hat/bas/akor, `drop` anında riser + vuruş).
   Miks: `loudnorm=I=-14:TP=-2,volume=0.5dB,alimiter=limit=0.7` → −14,9 LUFS / tepe −1,8 dBFS (limit 0.84 ile tepe 0 dBFS oluyordu).
+  Final (2026-10-24): 8 hediye Flow ürün fotoğrafı (`gifts/A,S,M,K,R,N,J,T.jpg`; S'deki Tesla arması rötuşla silindi,
+  plaka "GIFT 4U"). Hediye kartı zemini = fotoğrafın kenar rengi, sağ/sol kenar eritilir (yoksa dikiş görünüyordu), her karta
+  renkli çerçeve. Müzik yok (`"mood": "none"`): kullanıcı yüklerken YouTube ses kitaplığından ekler; efektler −6 dB.
+  Sonraki setler için öneri: hediyeleri her biri farklı pastel zeminle üret (beyaz hediyeler beyazda kayboluyor).
 - `tools/serve.js` .svg ve .webp türlerini de sunar (yoksa tarayıcı SVG'yi açmıyor).
 
 ## Açık işler

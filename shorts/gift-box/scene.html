@@ -22,9 +22,24 @@ const GIFTS = [   // Flow ürün fotoğrafları (beyaz/açık gri zemin); harf =
 ];
 const load = src => new Promise((ok, fail) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => fail(new Error(src)); im.src = src; });
 let BOX;
-window.ready = Promise.all([load(BOX_IMG).then(im => (BOX = im)), ...GIFTS.map(g => load(g.img).then(im => (g.im = im)))]);
+window.ready = Promise.all([load(BOX_IMG).then(im => (BOX = im)), ...GIFTS.map(g => load(g.img).then(im => prepGift(g, im)))]);
+// Fotoğrafın kenar rengini ölç (kart zemini olur) ve sağ/sol kenarlarını şeffaflaştır: kartta dikiş görünmesin.
+function prepGift(g, im) {
+  const n = 512, c = document.createElement('canvas'); c.width = c.height = n; const x = c.getContext('2d');
+  x.drawImage(im, 0, 0, n, n);
+  const d = x.getImageData(0, 0, n, n).data; let r = 0, gg = 0, b = 0, k = 0;
+  for (let i = 0; i < n; i++) for (const [px, py] of [[i, 2], [i, n - 3], [2, i], [n - 3, i]]) { const o = (py * n + px) * 4; r += d[o]; gg += d[o + 1]; b += d[o + 2]; k++; }
+  g.bg = `rgb(${Math.round(r / k)},${Math.round(gg / k)},${Math.round(b / k)})`;
+  x.globalCompositeOperation = 'destination-out';
+  for (const [x0, x1] of [[0, n * 0.14], [n, n * 0.86]]) {
+    const lg = x.createLinearGradient(x0, 0, x1, 0); lg.addColorStop(0, 'rgba(0,0,0,1)'); lg.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = lg; x.fillRect(Math.min(x0, x1), 0, Math.abs(x1 - x0), n);
+  }
+  g.im = c;
+}
 
 const REVEAL = 13.3, END = 14.5;
+const CARD_COLORS = ['#ff5fa2', '#2ec4b6', '#9b5de5', '#ff8c42', '#e63946', '#4895ef', '#f4a300', '#06a77d'];
 window.DURATION = END;
 const COLS = [280, 780], ROWS = [520, 800, 1080, 1360], S = 450;   // kutu görseli çizim boyutu (kare)
 const pos = i => [COLS[i % 2], ROWS[Math.floor(i / 2)]];
@@ -62,14 +77,14 @@ window.renderAt = (t) => {
     GIFTS.forEach((g, i) => {
       const [x, y] = pos(i), cw = 470, ch = 270;
       ctx.save(); ctx.translate(x, y);
-      // kart zemini fotoğrafların açık gri zeminiyle aynı; fotoğraf 'multiply' ile çizilir, kenar dikişi görünmez
-      ctx.fillStyle = '#f4f4f6'; ctx.strokeStyle = '#e3e5ec'; ctx.lineWidth = 3;
+      ctx.fillStyle = g.bg; ctx.strokeStyle = CARD_COLORS[i]; ctx.lineWidth = 12;   // zemin = fotoğrafın kenar rengi; renkli kalın çerçeve
       ctx.beginPath(); ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 22); ctx.fill(); ctx.stroke();
-      ctx.save(); ctx.clip(); ctx.globalCompositeOperation = 'multiply';
+      ctx.save(); ctx.clip();
       const s = 300 * (0.92 + 0.08 * k); ctx.drawImage(g.im, -s / 2, -s / 2 + 8, s, s); ctx.restore();
+      ctx.beginPath(); ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 22); ctx.stroke();
       ctx.font = 'bold 56px "DejaVu Serif", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.lineWidth = 8; ctx.strokeStyle = '#ffffff'; ctx.strokeText(g.letter, -cw / 2 + 48, -ch / 2 + 46);
-      ctx.fillStyle = ACCENT; ctx.fillText(g.letter, -cw / 2 + 48, -ch / 2 + 46);
+      ctx.fillStyle = CARD_COLORS[i]; ctx.fillText(g.letter, -cw / 2 + 48, -ch / 2 + 46);
       ctx.restore();
     });
   }

@@ -45,7 +45,7 @@ function drawSphere(ctx, x, y, r, o) {
   const tw = Math.ceil(2 * Math.PI * r * 1.5);
   const T = texAt(o.tex, tw), N = o.night && texAt(o.night, tw), C = o.clouds && texAt(o.clouds, tw);
   let [lx, ly, lz] = o.light || [-0.6, -0.35, 0.72]; const ll = Math.hypot(lx, ly, lz); lx /= ll; ly /= ll; lz /= ll;
-  const amb = o.ambient ?? 0.04, tilt = o.tilt || 0, pitch = o.pitch || 0;
+  const amb = o.ambient ?? 0.04, tilt = o.tilt || 0, pitch = o.pitch || 0, pw = o.power ?? 1; // power: 0 = Güneş yok
   const ct = Math.cos(tilt), st = Math.sin(tilt), cp = Math.cos(pitch), sp = Math.sin(pitch);
   const lon0 = (o.lon || 0) * Math.PI / 180, clon0 = ((o.cloudLon ?? o.lon) || 0) * Math.PI / 180;
   const atmo = o.atmo, as = o.atmoStrength ?? 0.6;
@@ -70,7 +70,7 @@ function drawSphere(ctx, x, y, r, o) {
         const mu = nz0, ld = 1 - 0.55 * (1 - Math.pow(mu, 0.6));
         R = R * ld * 1.15 + 30; G = G * ld * 1.05; B = B * ld * 0.8;
       } else {
-        const lit = amb + (1 - amb) * smooth(-0.08, 0.35, ndl) * (0.35 + 0.65 * clamp(ndl));
+        const lit = amb + (1 - amb) * pw * smooth(-0.08, 0.35, ndl) * (0.35 + 0.65 * clamp(ndl));
         if (C) {
           const cu = ((lon + clon0) / (2 * Math.PI) % 1 + 1) % 1;
           const ci = ((Math.min(C.h - 1, (v * C.h) | 0) * C.w + ((cu * C.w) | 0)) << 2);
@@ -79,11 +79,11 @@ function drawSphere(ctx, x, y, r, o) {
         }
         R *= lit; G *= lit; B *= lit;
         if (N) {
-          const dark = 1 - smooth(-0.2, 0.05, ndl);
+          const dark = 1 - pw * smooth(-0.2, 0.05, ndl);
           if (dark > 0) { R += N.d[ti] * dark * 1.1; G += N.d[ti + 1] * dark * 0.95; B += N.d[ti + 2] * dark * 0.6; }
         }
         if (atmo) { // kenarda atmosfer (Fresnel), aydınlık tarafta güçlü
-          const rim = Math.pow(1 - nz0, 2.5) * as * clamp(ndl + 0.35);
+          const rim = Math.pow(1 - nz0, 2.5) * as * clamp(ndl + 0.35) * pw;
           R += atmo[0] * rim; G += atmo[1] * rim; B += atmo[2] * rim;
         }
       }
@@ -92,10 +92,10 @@ function drawSphere(ctx, x, y, r, o) {
     }
   }
   cx.clearRect(0, 0, S, S); cx.putImageData(img, 0, 0);
-  if (atmo && !o.sun) { // dış hale
+  if (atmo && !o.sun && pw > 0.01) { // dış hale
     ctx.save();
     const g = ctx.createRadialGradient(x, y, r * 0.98, x, y, r * 1.12);
-    g.addColorStop(0, `rgba(${atmo.join(',')},${0.45 * as})`); g.addColorStop(1, `rgba(${atmo.join(',')},0)`);
+    g.addColorStop(0, `rgba(${atmo.join(',')},${0.45 * as * pw})`); g.addColorStop(1, `rgba(${atmo.join(',')},0)`);
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 1.12, 0, 6.2832); ctx.fill(); ctx.restore();
   }
   ctx.drawImage(can, 0, 0, S, S, x - c, y - c, S, S);

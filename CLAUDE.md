@@ -23,7 +23,17 @@ projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
 - `tools/shot.js` — tek kare PNG: `node tools/shot.js <sayfa> <çıktı.png> [t] [mod]`. Sayfayı yerel http sunucusundan açar
   (file:// ile doku pikselleri okunamıyor: "canvas has been tainted").
 
+- `tools/serve.js` (sayfayı yerel http'den açar), `tools/render.js` (sessiz video: `node tools/render.js <sayfa> <out.mp4> <sn>`),
+  `tools/audio.py` (kodla müzik + efekt: `python3 tools/audio.py <cue.json> <out.wav>`; poof, ticks, boom, rewind).
+- Miks: `loudnorm=I=-14:TP=-1.5,volume=2.7dB,alimiter=limit=0.84` → ölçülen −14,2 LUFS (tek geçiş loudnorm kısa klipte −16,7 veriyordu).
+- `shorts/<konu>/scene.html` + `cue.json`. Döngü için hikâye zamanı `tau` kullanılır (geri sarmada geriye akar); yıldızlar,
+  dönüş ve yüz animasyonu da `tau` ile çizilir, yoksa ilk ve son kare tutmaz.
+
+## Videolar
+- `shorts/sun-vanished/` — deneme 1 (2026-10-23): 14,5 sn. Kontroller: ilk–son kare farkı 0,44 (< 1), siyah kare 0,
+  −14,2 LUFS / tepe −1,1 dBFS, ses = görüntü = 14,5 sn. "Işık ve kütle çekimi aynı hızda" iddiası için iki kaynak henüz yazılmadı.
+
 ## Açık işler
 - Kızgın/donmuş ifadede dişler görünmüyor (ağız eğrisinin gerçek yüksekliği kontrol noktasının yarısı).
-- Video kayıt betiği (kare kare → ffmpeg), müzik/efekt, döngü ve titreme kontrolleri.
+- Kontrolleri tek betikte topla (ilk–son kare, siyah kare, LUFS, süre, kare sayfası).
 - Kanal adı, pilot konular (son 30 günde viral, kalabalık olmayan).

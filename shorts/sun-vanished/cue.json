@@ -1,0 +1,6 @@
+{"duration": 14.5, "events": [
+  {"t": 1.0, "type": "poof"},
+  {"t": 1.5, "type": "ticks", "until": 9.0, "every": 0.5},
+  {"t": 9.0, "type": "boom"},
+  {"t": 12.5, "type": "rewind", "until": 14.5}
+]}

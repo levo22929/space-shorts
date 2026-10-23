@@ -1,0 +1,124 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Bangers; src: url(../../engine/fonts/Bangers-Regular.ttf); }
+html, body { margin: 0; background: #000; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script src="../../engine/engine.js"></script>
+<script src="../../engine/real.js"></script>
+<script>
+// "What if the Sun vanished?" — deneme Short'u, 14,5 sn döngü.
+// Bilgi: Güneş'in yok olduğu haber (ışık ve kütle çekimi) ışık hızıyla gelir: 1 AU / c = 499 sn = 8 dk 19 sn.
+// O ana kadar Dünya hem aydınlık kalır hem yörüngesinde döner; sonra kararır ve teğet doğrultuda düz gider.
+const ctx = document.getElementById('c').getContext('2d');
+window.ready = loadTextures('../../engine/tex/', ['2k_sun', '2k_earth_daymap', '2k_earth_nightmap', '2k_earth_clouds']);
+
+// zaman çizelgesi (sn)
+const VANISH = 1.0, GONE = 1.45, HIT = 9.0, DARK = 9.45, REWIND = 12.5, END = 14.5;
+window.DURATION = END;
+const SUN = { x: 540, y: 620, r: 150 }, ER = 145;
+const ORB = { rx: 430, ry: 640 };              // yörünge elipsi, merkez Güneş
+const LIGHT_SEC = 499;                         // 1 AU / c
+
+const orbitPos = th => [SUN.x + ORB.rx * Math.cos(th), SUN.y + ORB.ry * Math.sin(th)];
+const theta = tau => (80 + 2.2 * tau) * Math.PI / 180;    // yavaşça sağdan sola
+
+// tau: hikâye zamanı. Geri sarmada tau geriye akar; böylece son kare ilk kareyle aynı olur.
+function state(tau) {
+  let [ex, ey] = orbitPos(theta(Math.min(tau, HIT)));
+  if (tau > HIT) { // yörünge biter: teğet doğrultuda sabit hızla düz gider
+    const th = theta(HIT), d = 2.2 * Math.PI / 180;
+    const vx = -ORB.rx * Math.sin(th) * d, vy = ORB.ry * Math.cos(th) * d;
+    const k = (tau - HIT) * 9;                  // kaçış hızlandırılmış gösterilir
+    ex += vx * k; ey += vy * k;
+  }
+  return { ex, ey };
+}
+
+window.renderAt = (t) => {
+  const rew = t > REWIND, tau = rew ? REWIND * (1 - ease.inOut((t - REWIND) / (END - REWIND))) : t;
+  ctx.clearRect(0, 0, W, H);
+  drawSpace(ctx, tau);
+  const { ex, ey } = state(tau);
+
+  // yörünge çizgisi
+  ctx.save(); ctx.globalAlpha = 0.22; ctx.strokeStyle = '#9fd3ff'; ctx.lineWidth = 3; ctx.setLineDash([14, 14]);
+  ctx.beginPath(); ctx.ellipse(SUN.x, SUN.y, ORB.rx, ORB.ry, 0, 0, 6.2832); ctx.stroke(); ctx.restore();
+
+  // Güneş: önce şaşırır, sonra parlayıp küçülerek yok olur
+  if (tau < GONE) {
+    const k = prog(tau, VANISH, GONE, ease.in), r = SUN.r * (1 - k);
+    if (r > 1) {
+      drawRealSun(ctx, SUN.x, SUN.y, r, tau);
+      drawFace(ctx, SUN.x, SUN.y + r * 0.05, r, lerpExpr(EXPR.happy, EXPR.surprised, prog(tau, 0.45, 0.8)), tau, '#ffb627', '#5a1e00');
+    }
+    if (tau > VANISH) glow(ctx, SUN.x, SUN.y, 0, SUN.r * 2.2, 'rgba(255,240,200,1)', Math.sin(k * Math.PI) * 0.9);
+  }
+
+  // son ışığın sınırı: Güneş'ten Dünya'ya ışık hızıyla ilerleyen halka
+  const dist = Math.hypot(orbitPos(theta(HIT))[0] - SUN.x, orbitPos(theta(HIT))[1] - SUN.y);
+  if (tau > VANISH && tau < HIT + 0.3) {
+    const R = dist * prog(tau, VANISH, HIT, ease.linear);
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 330, W, H); ctx.clip();
+    ctx.globalAlpha = 0.85 * (1 - prog(tau, HIT, HIT + 0.3));
+    ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 9; ctx.shadowColor = '#ffb703'; ctx.shadowBlur = 30;
+    ctx.beginPath(); ctx.arc(SUN.x, SUN.y, Math.max(1, R), 0, 6.2832); ctx.stroke(); ctx.restore();
+  }
+
+  // karanlıktan sonra: teğet doğrultudaki düz yol (kesikli)
+  if (tau > HIT) {
+    const [hx, hy] = orbitPos(theta(HIT)), th = theta(HIT), dx = -Math.sin(th) * ORB.rx, dy = Math.cos(th) * ORB.ry, dl = Math.hypot(dx, dy);
+    ctx.save(); ctx.globalAlpha = 0.6 * prog(tau, HIT, DARK); ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 5; ctx.setLineDash([22, 16]);
+    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + dx / dl * 900, hy + dy / dl * 900); ctx.stroke(); ctx.restore();
+  }
+
+  // Dünya: ışık Güneş'in olduğu yerden gelir; HIT anında söner
+  const power = 1 - prog(tau, HIT, DARK);
+  const lx = SUN.x - ex, ly = SUN.y - ey, ll = Math.hypot(lx, ly);
+  drawPlanet(ctx, 'earth', ex, ey, ER, tau, { light: [lx / ll, ly / ll, 1.1], power, ambient: 0.04 + 0.1 * (1 - power) });
+  let e;
+  if (tau < GONE) e = EXPR.happy;
+  else if (tau < 7.6) e = lerpExpr(EXPR.happy, EXPR.cool, prog(tau, GONE, GONE + 0.4));
+  else if (tau < HIT) e = lerpExpr(EXPR.cool, EXPR.surprised, prog(tau, 7.6, 8.0));
+  else e = lerpExpr(EXPR.surprised, EXPR.scared, prog(tau, HIT, DARK));
+  drawFace(ctx, ex, ey + 6, ER, e, tau, '#2a6db0', '#06152e');
+
+  // yazılar
+  title(ctx, [{ text: 'WHAT IF THE', color: '#ffffff' }, { text: 'SUN', color: '#ffd60a' }], 150, 104);
+  title(ctx, [{ text: 'VANISHED?', color: '#ffd60a' }], 260, 104);
+  if (tau > GONE - 0.1) {
+    const a = prog(tau, GONE - 0.1, GONE + 0.2);
+    const sec = Math.min(LIGHT_SEC, Math.floor(LIGHT_SEC * prog(tau, GONE, HIT, ease.linear)));
+    ctx.save(); ctx.globalAlpha = a;
+    label(ctx, `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`, SUN.x, SUN.y, 150, tau >= HIT ? '#ff6b6b' : '#ffffff');
+    label(ctx, 'SINCE THE SUN VANISHED', SUN.x, SUN.y + 110, 46, '#9fd3ff');
+    ctx.restore();
+  }
+  if (tau > 2.4 && tau < 7.4) {
+    ctx.save(); ctx.globalAlpha = prog(tau, 2.4, 2.8) * (1 - prog(tau, 7.0, 7.4));
+    label(ctx, 'EARTH STILL SEES SUNLIGHT', 540, 1010, 58, '#ffffff');
+    label(ctx, 'AND STILL FEELS ITS GRAVITY', 540, 1075, 46, '#ffd60a');
+    ctx.restore();
+  }
+  if (tau > 7.6 && tau < HIT) {
+    ctx.save(); ctx.globalAlpha = prog(tau, 7.6, 7.9);
+    label(ctx, 'NEWS TRAVELS AT LIGHT SPEED', 540, 1010, 58, '#ffffff');
+    ctx.restore();
+  }
+  if (tau > DARK) {
+    ctx.save(); ctx.globalAlpha = prog(tau, DARK, DARK + 0.3);
+    label(ctx, 'DARKNESS.', 540, 900, 96, '#ff6b6b');
+    label(ctx, 'NO ORBIT. STRAIGHT LINE.', 540, 985, 50, '#ffffff');
+    ctx.restore();
+  }
+  // geri sarma işareti
+  if (rew) {
+    ctx.save(); ctx.globalAlpha = 0.55 * Math.sin(Math.PI * (t - REWIND) / (END - REWIND));
+    label(ctx, '<<', 120, 400, 90, '#ffffff');
+    ctx.fillStyle = 'rgba(120,180,255,0.08)'; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+};
+</script></body></html>

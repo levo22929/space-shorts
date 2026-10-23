@@ -1,81 +1,20 @@
 {
- "duration": 15.0,
- "mood": "happy",
+ "duration": 14.5,
+ "mood": "hype",
+ "bpm": 120,
+ "drop": 13.3,
  "events": [
   {
-   "t": 4.0,
+   "t": 13.3,
    "type": "pop"
   },
   {
-   "t": 4.1,
+   "t": 13.32,
    "type": "sparkle"
   },
   {
-   "t": 4.45,
-   "type": "pop"
-  },
-  {
-   "t": 4.55,
+   "t": 13.36,
    "type": "sparkle"
-  },
-  {
-   "t": 4.9,
-   "type": "pop"
-  },
-  {
-   "t": 5.0,
-   "type": "sparkle"
-  },
-  {
-   "t": 5.35,
-   "type": "pop"
-  },
-  {
-   "t": 5.45,
-   "type": "sparkle"
-  },
-  {
-   "t": 5.8,
-   "type": "pop"
-  },
-  {
-   "t": 5.9,
-   "type": "sparkle"
-  },
-  {
-   "t": 6.25,
-   "type": "pop"
-  },
-  {
-   "t": 6.35,
-   "type": "sparkle"
-  },
-  {
-   "t": 6.7,
-   "type": "pop"
-  },
-  {
-   "t": 6.8,
-   "type": "sparkle"
-  },
-  {
-   "t": 7.15,
-   "type": "pop"
-  },
-  {
-   "t": 7.25,
-   "type": "sparkle"
-  },
-  {
-   "t": 0.0,
-   "type": "ticks",
-   "until": 4.0,
-   "every": 0.455
-  },
-  {
-   "t": 13.0,
-   "type": "rewind",
-   "until": 14.5
   }
  ]
 }

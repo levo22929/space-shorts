@@ -42,6 +42,11 @@ projesi, oradan kod kopyalanmaz (sadece oradan öğrenilen dersler uygulanır).
   Twemoji (CC BY 4.0, `gifts/TWEMOJI-LICENSE.txt`); kullanıcı Flow'da üretip gönderince `scene.html` içindeki `GIFTS[i].img`
   değiştirilir. Kontroller: ilk–son kare 0,11, siyah kare 0, −13,7 LUFS / tepe −1,3 dBFS, ses = görüntü = 15 sn.
   Ses: `cue.json` (`"mood": "happy"`, pop + sparkle + tick + rewind). Bu klipte +2,7 dB fazla geldi; `volume=0.6dB` kullanıldı.
+  v2 (2026-10-24, rakibin ekran kaydından ölçülen zamanlama): ~13,3 sn hareketsiz kutular, 0,15 sn'de hepsi birden açılır,
+  hediyeler ~1,2 sn görünür, sert kesmeyle başa döner (ilk–son kare kasıtlı olarak farklı). Rakip (im2ylitee) her videoda
+  harf seti ve kutu rengini değiştiriyor; konuşma yok, enerjik müzik ("Bu sesi kullan" → YouTube ses kitaplığı).
+  Müzik: `"mood": "hype"` (`tools/audio.py` `hype()`: 120 bpm kick/alkış/hi-hat/bas/akor, `drop` anında riser + vuruş).
+  Miks: `loudnorm=I=-14:TP=-2,volume=0.5dB,alimiter=limit=0.7` → −14,9 LUFS / tepe −1,8 dBFS (limit 0.84 ile tepe 0 dBFS oluyordu).
 - `tools/serve.js` .svg ve .webp türlerini de sunar (yoksa tarayıcı SVG'yi açmıyor).
 
 ## Açık işler

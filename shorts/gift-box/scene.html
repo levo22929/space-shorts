@@ -21,7 +21,9 @@ window.ready = Promise.all(GIFTS.map(g => new Promise((ok, fail) => {
   const im = new Image(); im.onload = () => { g.im = im; ok(); }; im.onerror = () => fail(new Error(g.img)); im.src = g.img;
 })));
 
-const OPEN0 = 4.0, STEP = 0.45, CLOSE = 13.0, END = 15.0;   // açılış başlangıcı, kutular arası, kapanış, döngü sonu
+// Rakipte (im2ylitee) ölçülen: ~13 sn hareketsiz kutular, hediyeler yalnızca ~1 sn görünür, sonra sert kesmeyle başa döner.
+// Kısa görünme izleyiciyi tekrar izlemeye/durdurmaya iter. Kapanış animasyonu yok (CLOSE > END).
+const OPEN0 = 13.3, STEP = 0, OPEN_DUR = 0.15, CLOSE = 99, END = 14.5;
 window.DURATION = END;
 const COLS = [300, 780], ROWS = [560, 845, 1130, 1415], BW = 330, BH = 210;
 const pos = i => [COLS[i % 2], ROWS[Math.floor(i / 2)]];
@@ -107,7 +109,7 @@ window.renderAt = (t) => {
 
   GIFTS.forEach((g, i) => {
     const [x, y] = pos(i);
-    const o = t < CLOSE ? prog(t, openAt(i), openAt(i) + 0.5, ease.out) : 1 - prog(t, CLOSE + i * 0.12, CLOSE + i * 0.12 + 0.4, ease.inOut);
+    const o = t < CLOSE ? prog(t, openAt(i), openAt(i) + OPEN_DUR, ease.out) : 1 - prog(t, CLOSE + i * 0.12, CLOSE + i * 0.12 + 0.4, ease.inOut);
     // açılmadan önce: kutular sırayla zıplar (seçim heyecanı)
     const env = prog(t, 0, 0.5) * (1 - prog(t, OPEN0 - 0.3, OPEN0)); // döngü başında/sonunda sıfır
     const hop = env * Math.max(0, Math.sin((t * 2.2 - i * 0.28) * Math.PI)) ** 6 * 26;

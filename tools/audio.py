@@ -60,6 +60,40 @@ def rewind(dur):
     return s * np.sin(np.pi * t / dur) ** 2
 
 
+def hype(dur, bpm=120, drop=None):
+    """Enerjik pop/EDM döngüsü: düz kick, 2 ve 4'te alkış, sekizlik hi-hat, ara vuruş bas, akor vuruşları.
+    drop: o saniyeden önce 2 sn yükselen gürültü (riser), drop anında güçlü vuruş."""
+    n = int(dur * SR); t = np.arange(n) / SR; out = np.zeros(n); beat = 60 / bpm
+    R = np.random.default_rng(5)
+    def put(x, at, g=1.0):
+        i = int(at * SR); j = min(n, i + len(x))
+        if 0 <= i < n: out[i:j] += g * x[: j - i]
+    kn = int(0.3 * SR); kt = np.arange(kn) / SR
+    kick = np.sin(2 * np.pi * np.cumsum(50 + 110 * np.exp(-kt * 35)) / SR) * np.exp(-kt * 9)
+    cn = int(0.18 * SR); ct = np.arange(cn) / SR
+    clap = R.standard_normal(cn) * np.exp(-ct * 25) * 0.5
+    hn = int(0.05 * SR); hat = np.diff(R.standard_normal(hn + 1)) * np.exp(-np.arange(hn) / SR * 90) * 0.18
+    prog = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [261.63, 329.63, 392.0], [196.0, 246.94, 293.66]]  # Am F C G
+    b = 0
+    while b * beat < dur:
+        at = b * beat; ch = prog[(b // 4) % 4]
+        put(kick, at, 0.9)
+        if b % 2 == 1: put(clap, at, 0.8)
+        put(hat, at + beat / 2, 1.0); put(hat, at, 0.5)
+        bn = int(beat / 2 * SR); bt = np.arange(bn) / SR       # ara vuruşta bas
+        put(np.sign(np.sin(2 * np.pi * ch[0] / 4 * bt)) * np.exp(-bt * 6) * 0.25, at + beat / 2)
+        sn = int(beat * 0.45 * SR); st = np.arange(sn) / SR     # testere akor vuruşu
+        stab = sum(((f * st) % 1.0 * 2 - 1) for f in ch) / 3 * np.exp(-st * 7) * 0.22
+        put(stab, at); put(stab * 0.6, at + beat * 0.75)
+        b += 1
+    if drop:
+        rn = int(2.0 * SR); rt = np.arange(rn) / SR
+        riser = R.standard_normal(rn) * (rt / 2.0) ** 2 * 0.35 + np.sin(2 * np.pi * np.cumsum(300 + 1500 * (rt / 2) ** 2) / SR) * (rt / 2) * 0.15
+        put(riser, drop - 2.0)
+        put(kick, drop, 1.6); put(clap, drop, 1.2)
+    return out / np.abs(out).max() * 0.6
+
+
 def pop():
     n = int(0.25 * SR); t = np.arange(n) / SR
     f = 500 + 900 * np.exp(-t * 30)
@@ -82,7 +116,8 @@ def place(buf, x, at):
 def main(cue_path, out):
     cue = json.load(open(cue_path))
     dur = cue["duration"]
-    music = pad(dur, cue.get("mood", "dark"))
+    mood = cue.get("mood", "dark")
+    music = hype(dur, cue.get("bpm", 120), cue.get("drop")) if mood == "hype" else pad(dur, mood)
     sfx = np.zeros_like(music)
     duck = np.ones_like(music)
     for e in cue["events"]:

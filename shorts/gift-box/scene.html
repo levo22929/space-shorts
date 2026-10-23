@@ -45,12 +45,12 @@ const COLS = [280, 780], ROWS = [520, 800, 1080, 1360], S = 450;   // kutu görs
 const pos = i => [COLS[i % 2], ROWS[Math.floor(i / 2)]];
 
 // Harf animasyonu. Rakipte harfler hep birlikte ~0,84 sn'de bir sönüp yanıyor (kutular sabit). Bizde daha enerjik:
-// 120 bpm vuruş, harfler A'dan T'ye dalga halinde zıplar (büyüme + sallanma), vuruşta beyazdan altına parlar, ışık halesi;
+// 80 bpm vuruş, harfler A'dan T'ye dalga halinde zıplar (büyüme + sallanma), vuruşta beyazdan altına parlar, ışık halesi;
 // her 4 vuruşta bir kısa, sert sönüp yanma (rakipteki yanıp sönmenin hızlı hali).
-const BPM = 120;
+const BPM = 80;   // 120 aşırı hızlı bulundu (2026-10-24); rakip ~71
 function letter(ch, x, y, t, i) {
   const beat = t * BPM / 60 - i * 0.12;                  // dalga: her harf biraz gecikmeli
-  const ph = ((beat % 1) + 1) % 1, kick = Math.exp(-ph * 7);   // vuruşta 1, hızla söner
+  const ph = ((beat % 1) + 1) % 1, kick = Math.exp(-ph * 5);   // vuruşta 1, hızla söner
   const blinkOn = !(((Math.floor(beat) % 4) + 4) % 4 === 3 && ph > 0.55 && ph < 0.8);
   if (!blinkOn) return;
   const sc = 1 + 0.32 * kick, rot = 0.14 * Math.sin(beat * Math.PI) * (0.4 + kick), lift = -18 * kick;

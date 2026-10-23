@@ -44,6 +44,24 @@ window.DURATION = END;
 const COLS = [280, 780], ROWS = [520, 800, 1080, 1360], S = 450;   // kutu görseli çizim boyutu (kare)
 const pos = i => [COLS[i % 2], ROWS[Math.floor(i / 2)]];
 
+// Harf animasyonu. Rakipte harfler hep birlikte ~0,84 sn'de bir sönüp yanıyor (kutular sabit). Bizde daha enerjik:
+// 120 bpm vuruş, harfler A'dan T'ye dalga halinde zıplar (büyüme + sallanma), vuruşta beyazdan altına parlar, ışık halesi;
+// her 4 vuruşta bir kısa, sert sönüp yanma (rakipteki yanıp sönmenin hızlı hali).
+const BPM = 120;
+function letter(ch, x, y, t, i) {
+  const beat = t * BPM / 60 - i * 0.12;                  // dalga: her harf biraz gecikmeli
+  const ph = ((beat % 1) + 1) % 1, kick = Math.exp(-ph * 7);   // vuruşta 1, hızla söner
+  const blinkOn = !(((Math.floor(beat) % 4) + 4) % 4 === 3 && ph > 0.55 && ph < 0.8);
+  if (!blinkOn) return;
+  const sc = 1 + 0.32 * kick, rot = 0.14 * Math.sin(beat * Math.PI) * (0.4 + kick), lift = -18 * kick;
+  ctx.save(); ctx.translate(x, y + lift); ctx.rotate(rot); ctx.scale(sc, sc);
+  ctx.font = 'bold 112px "DejaVu Serif", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(255,200,40,' + (0.9 * kick).toFixed(3) + ')'; ctx.shadowBlur = 40 * kick;
+  ctx.lineWidth = 12; ctx.strokeStyle = 'rgba(10,20,60,0.95)'; ctx.strokeText(ch, 0, 0);
+  ctx.shadowBlur = 0; ctx.fillStyle = mixColor('#ffffff', '#ffd23f', Math.min(1, kick * 1.3)); ctx.fillText(ch, 0, 0);
+  ctx.restore();
+}
+
 function header(sub) {
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
   ctx.font = '124px Bangers'; ctx.lineWidth = 16; ctx.strokeStyle = '#ffffff'; ctx.strokeText('CHOOSE ONE BOX', W / 2, 160);
@@ -65,11 +83,8 @@ window.renderAt = (t) => {
       ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
       ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(BOX, -S / 2, -S / 2, S, S);
       ctx.globalCompositeOperation = 'source-over';
-      // harf: ön yüzde iki kurdelenin arasına, beyaz serif + koyu kontur
-      ctx.font = 'bold 92px "DejaVu Serif", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.lineJoin = 'round'; ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(10,20,60,0.9)';
-      ctx.strokeText(g.letter, -S * 0.03, S * 0.19); ctx.fillStyle = '#ffffff'; ctx.fillText(g.letter, -S * 0.03, S * 0.19);
       ctx.restore();
+      letter(g.letter, x - S * 0.03, y + S * 0.19, t, i);
     });
   } else {
     header('WHAT DID YOU GET? \u{1F381}');

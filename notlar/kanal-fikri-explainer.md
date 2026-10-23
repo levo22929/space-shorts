@@ -31,3 +31,16 @@ Kaynak betikler: oturum karalama alanında (search.py, chan.py); yeni oturumda y
 - Hava/afet nişinde "Every X Explained" kalabalıklaşıyor; yeni küçük kanallar (Lusal, DisasterLab, Nature Danger) neredeyse hiç izlenmiyor.
 - Nişte son ayda büyüyen tek kanal Disasters Explained (bej 3B tarz). Gusty ve Escalist'te medyan 10–20 kat düştü.
 - Beyaz zemin "Paint" tarzının büyükleri (Paint Explainer, Simple Paint) konu çeşitliliğiyle ayda video başı ~350K'yı koruyor.
+
+# Kanal fikri 3: izleyiciye seçim yaptıran format (1-2-3-4-5) — tarama 2026-10-23 (son 15 gün: 8–23 Eki)
+24 arama ifadesi ("choose one box", "pick a door", "would you rather", "choose your outfit"…), 601 video, 513'ü son 15 günde.
+Küçük ama çok izlenen kanallar (abone < 100K, video < 150):
+| Kanal | Açılış | Abone | İçerik | Medyan izlenme | ≥100K | Format | Kodla yapılır mı |
+|---|---|---|---|---|---|---|---|
+| im2ylitee | 5 Eki 2026 | 14,9K | 44 Short | 522K | 32 | "choose one box 🎁 for your gift": harfli hediye kutuları, adının baş harfini seç | Evet (kutular kod, hediyeler Twemoji) |
+| Style Belle | 20 Ağu 2026 | 5,2K | 96 Short | 60K | 26 | "Choose your dream outfit 1,2,3 or 4": numaralı kıyafet ızgarası | Kısmen (kıyafet görselleri gerekir) |
+| Art by JD | 25 Ara 2025 | 25,8K | 48 | 96K | 23 | Harita üzerinde bayrak çizimi, ülkeyi tahmin et (gerçek el çekimi) | Kodla harita çizimi olarak evet |
+| Studio Loops | 12 Eki 2026 | 1K | 48 | 6K (en iyi 325K) | 3 | "Guess which colour wins": fizik simülasyonu | Evet, tamamen |
+| Quiz Stumble | Eyl 2024 | 59,9K | 33 | ? (en iyi 985K) | ? | 10 dk "Would you rather" | Kısmen (görseller) |
+| Theo and Tia / Lou and Cray | — | 37K / 209K | 99 / 66 | 97K / 395K | — | Gerçek kişi / Minecraft "pick a door" | Hayır |
+Kopyacılar: Cute Gifts (18 Eki), Mk GIFT BOX (18 Eki), Sagar_yt26 (10 Eki, medyan 12K) — hediye kutusu trendi hızla kalabalıklaşıyor.
